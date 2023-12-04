@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Voice Detection</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #3498db, #8e44ad);
+            color: #ffffff;
+            text-align: center;
+            padding: 40px;
+            margin: 0;
+        }
+
+        h1 {
+            color: #ffffff;
+        }
+
+        form {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 8px;
+            display: inline-block;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.5s ease-in-out;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        input[type="submit"],
+        input[type="reset"] {
+            background-color: #3498db;
+            color: #ffffff;
+            border: 2px solid #2980b9;
+            padding: 15px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        input[type="submit"]:hover,
+        input[type="reset"]:hover {
+            background-color: #2980b9;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Deepfake Voice Detection</h1>
+    <form action="/predict" method="post" enctype="multipart/form-data">
+        <label for="voiceFile">Upload Voice File:</label>
+        <input type="file" id="voiceFile" name="voiceFile" accept=".mp3, .wav">
+        <br><br>
+        <input type="submit" value="Detect">
+        <input type="reset" value="Reset">
+    </form>
+    <div>
+            {% if prediction == 0 %}
+                <h2 style="color: red">Fake</h2>
+            {% elif prediction == 1 %}
+                <h2 style="color: green">Real</h2>
+            {% endif %}
+    </div>
+</body>
+</html>
