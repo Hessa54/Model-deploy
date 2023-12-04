@@ -1,48 +1,63 @@
-from flask import Flask, render_template
-
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return render_template('index.html')
-    
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
- 
-
-from flask import Flask, request, jsonify
+import flask
+import pickle
+import librosa
 import numpy as np
-import librosa  # You may need to install this library: pip install librosa
-import joblib
+from sklearn.preprocessing import StandardScaler
 
-app = Flask(__name__)
+# Load the model
+try:
+    with open("/workspaces/Model-deploy/models/rf_model.pkl", "rb") as f:
+        model = pickle.load(f)
+except Exception as e:
+    print(e)
 
-# Load the trained Random Forest model
-model = joblib.load("/workspaces/Model-deploy/models/rf_model.pkl")
 
 def extract_audio_features(audio_file_path):
-   mfccs = librosa.feature.mfcc(y=audio, sr=sample_rate, n_mfcc=40)
-   mfccs_processed = np.mean(mfccs.T, axis=0)
-   # Normalize the features
-   scaled_features = scaler.transform([mfccs_processed])
-   return  scaled_features
+    # Load the audio file
+    y, sr = librosa.load(audio_file_path)
 
-@app.route('/predict', methods=['POST'])
+    # Extract MFCC features
+    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
+
+    # Compute the mean of the MFCCs
+    mfccs_processed = np.mean(mfccs.T, axis=0)
+
+    # Normalize the features
+    scaler = StandardScaler()
+    scaled_features = scaler.transform([mfccs_processed])
+
+    return scaled_features
+
+
+app = flask.Flask(__name__)
+
+
+@app.route("/predict", methods=["POST"])
 def predict():
-    try:
-        # Get audio file path from the request
-        audio_file_path = request.json['audio_file_path']
+    # Get the audio file from the request
+    audio_file = flask.request.files["audio_file"]
 
-        # Extract audio features
-        audio_features = extract_audio_features(audio_file_path)
+    # Extract audio features
+    audio_features = extract_audio_features(audio_file)
 
-        # Make predictions using the loaded model
-        predictions = model.predict([audio_features])
+    # Make a prediction using the model
+    prediction = model.predict(audio_features)
 
-        # Return the predictions as JSON
-        return jsonify({'predictions': predictions.tolist()})
-    except Exception as e:
-        return jsonify({'error': str(e)})
+    # Return the prediction
+    return flask.jsonify({"prediction": prediction[0]})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+
+@app.route("/get_prediction_output", methods=["POST"])
+def get_prediction_output():
+    # Get the data from the request
+    data = flask.request.get_json()
+
+    # Make a prediction using the data
+    prediction = predict_mpg(data)
+
+    # Return the prediction
+    return flask.jsonify({"prediction": prediction})
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080, debug=True)

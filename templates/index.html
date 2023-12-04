@@ -79,16 +79,16 @@
 <body>
     <h1>Deepfake Voice Detection</h1>
     <form action="/predict" method="post" enctype="multipart/form-data">
-        <label for="voiceFile">Upload Voice File:</label>
-        <input type="file" id="voiceFile" name="voiceFile" accept=".mp3, .wav">
+        <label for="audio_file_path">Upload Voice File:</label>
+        <input type="file" id="audio_file_path" name="audio_file_path" accept=".mp3, .wav">
         <br><br>
         <input type="submit" value="Detect">
         <input type="reset" value="Reset">
     </form>
     <div>
-            {% if prediction == 0 %}
+            {% if predictions == 0 %}
                 <h2 style="color: red">Fake</h2>
-            {% elif prediction == 1 %}
+            {% elif predictions == 1 %}
                 <h2 style="color: green">Real</h2>
             {% endif %}
     </div>
